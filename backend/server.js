@@ -12,8 +12,19 @@ const app = express();
 app.use(helmet());
 
 // 2. Configuración de CORS
+const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : ['http://localhost:5173'];
+
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Permitir peticiones sin origin (como herramientas de testeo / Postman) o si están en la lista
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('No permitido por CORS'));
+        }
+    },
     optionsSuccessStatus: 200 // para compatibilidad con navegadores antiguos
 };
 app.use(cors(corsOptions));
