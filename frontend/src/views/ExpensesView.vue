@@ -231,7 +231,7 @@ const handleConfirm = () => {
     </div>
 
     <div v-else class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>Fecha Real</th>
@@ -245,29 +245,30 @@ const handleConfirm = () => {
         </thead>
         <tbody>
             <tr v-for="expense in expensesData" :key="expense.id">
-              <td>
+              <td data-label="Fecha Real">
                 <span class="d-text">{{ expense.date.split(' ')[0].split('-').reverse().join('/') }}</span>
                 <span class="muted date-time" v-if="expense.date.includes(' ')">
                   {{ expense.date.split(' ')[1].slice(0, 5) }}
                 </span>
               </td>
-              <td>
+              <td data-label="Concepto">
                 <span v-if="expense.concept_name" class="concept-tag">{{ expense.concept_name }}</span>
+                <span v-else class="muted">-</span>
               </td>
-              <td class="font-bold">{{ expense.description }}</td>
-              <td>
+              <td data-label="Descripción / Item" class="font-bold">{{ expense.description }}</td>
+              <td data-label="Atribuído A">
                 <span class="badge badge-assigned">{{ expense.assigned_to_name }}</span>
               </td>
-              <td class="muted">{{ expense.created_by_name }}</td>
-              <td class="text-emerald font-bold">${{ formatCurrency(expense.amount) }}</td>
-            <td>
-              <div class="action-buttons" v-if="canEditExpense(expense)">
-                <button @click="openEditModal(expense)" class="btn-icon" title="Editar">✏️</button>
-                <button @click="confirmDeleteExpense(expense)" class="btn-icon danger" title="Borrar">🗑️</button>
-              </div>
-              <span v-else class="muted text-small">Bloqueado</span>
-            </td>
-          </tr>
+              <td data-label="Ingresado Por" class="muted">{{ expense.created_by_name }}</td>
+              <td data-label="Monto" class="text-emerald font-bold">${{ formatCurrency(expense.amount) }}</td>
+              <td data-label="Ajustes">
+                <div class="action-buttons" v-if="canEditExpense(expense)">
+                  <button @click="openEditModal(expense)" class="btn-icon" title="Editar">✏️</button>
+                  <button @click="confirmDeleteExpense(expense)" class="btn-icon danger" title="Borrar">🗑️</button>
+                </div>
+                <span v-else class="muted text-small">Bloqueado</span>
+              </td>
+            </tr>
         </tbody>
       </table>
     </div>
@@ -380,7 +381,7 @@ const handleConfirm = () => {
 .month-controls h2 { margin: 0; font-size: 1.3rem; color: #FFF; font-weight: 800; min-width: 190px; text-align: center; }
 .btn-arrow { background: #111; color: #A0A5AA; border: 1px solid #333; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
 .btn-arrow:hover { color: #FFF; border-color: #555; }
-.header-actions { display: flex; align-items: center; gap: 1.5rem; }
+.header-actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .subtitle { margin: 0; color: #7E8286; font-size: 0.9rem; }
 @media (max-width: 768px) { .hide-mobile { display: none; } }
 
@@ -436,5 +437,6 @@ const handleConfirm = () => {
   .header-navigator { flex-direction: column; align-items: stretch; text-align: center; }
   .month-controls { justify-content: center; }
   .month-controls h2 { min-width: auto; font-size: 1.1rem; }
+  .header-actions { justify-content: center; }
 }
 </style>

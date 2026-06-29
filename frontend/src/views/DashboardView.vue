@@ -347,7 +347,7 @@ const handleExportExcel = () => {
         <div class="section-title"><h3>Últimos tickets cargados</h3></div>
         
         <div class="table-container">
-          <table class="data-table">
+          <table class="data-table responsive-table">
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -360,14 +360,15 @@ const handleExportExcel = () => {
             </thead>
             <tbody>
               <tr v-for="gasto in dashboardData.movimientos_recientes" :key="gasto.id">
-                <td>{{ gasto.date.split(' ')[0].split('-').reverse().join('/') }}</td>
-                <td>
+                <td data-label="Fecha">{{ gasto.date.split(' ')[0].split('-').reverse().join('/') }}</td>
+                <td data-label="Concepto">
                   <span v-if="gasto.concept_name" class="concept-tag">{{ gasto.concept_name }}</span>
+                  <span v-else class="muted">-</span>
                 </td>
-                <td class="font-bold">{{ gasto.description }}</td>
-                <td class="text-emerald font-bold">${{ formatCurrency(gasto.amount) }}</td>
-                <td>{{ gasto.created_by_name }}</td>
-                <td>{{ gasto.assigned_to_name }}</td>
+                <td data-label="Descripción" class="font-bold">{{ gasto.description }}</td>
+                <td data-label="Monto" class="text-emerald font-bold">${{ formatCurrency(gasto.amount) }}</td>
+                <td data-label="Cargado por">{{ gasto.created_by_name }}</td>
+                <td data-label="A cuenta de">{{ gasto.assigned_to_name }}</td>
               </tr>
               <tr v-if="dashboardData.movimientos_recientes.length === 0">
                 <td colspan="6" style="text-align: center; color: #777;">No se registraron gastos en este periodo fiscal.</td>
@@ -503,12 +504,12 @@ const handleExportExcel = () => {
 .status-chip { padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-left: 0.5rem; }
 .status-chip.open { background-color: rgba(0, 255, 102, 0.15); color: #00FF66; }
 .status-chip.closed { background-color: rgba(255, 255, 255, 0.1); color: #999; }
-.header-actions-group { display: flex; gap: 0.75rem; align-items: center; }
+.header-actions-group { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
 
 .empty-state { text-align: center; padding: 4rem 2rem; background-color: #1A1C1D; border: 1px dashed #333; border-radius: 12px; color: #7E8286; }
 
 /* SUMMARY CARDS */
-.summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+.summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
 .card { padding: 1.5rem; border-radius: 12px; border: 1px solid #333; }
 .card.bg-dark { background-color: #1A1C1D; }
 .card.bg-success { background-color: rgba(0, 255, 102, 0.05); border-color: rgba(0, 255, 102, 0.2); }
@@ -519,7 +520,7 @@ const handleExportExcel = () => {
 .section-title h3 { color: #FFF; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
 
 /* MEMBERS GRID */
-.member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+.member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
 .member-card { background: #1A1C1D; padding: 1.5rem; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; gap: 1.2rem; }
 .member-header { display: flex; align-items: center; gap: 1rem; }
 .m-avatar { width: 44px; height: 44px; border-radius: 50%; background: #2A2C2E; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: #FFF; }
@@ -584,5 +585,6 @@ const handleExportExcel = () => {
   .month-controls h2 { min-width: auto; font-size: 1.1rem; }
   .summary-cards { grid-template-columns: 1fr; }
   .card h3 { font-size: 1.5rem; }
+  .header-actions-group { justify-content: center; }
 }
 </style>

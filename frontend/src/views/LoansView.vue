@@ -591,7 +591,7 @@ onMounted(loadData);
 .subtitle { color: #7E8286; margin: 0.2rem 0 0 0; }
 
 /* Global Summary */
-.global-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+.global-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
 .summary-card { background: #1A1C1D; padding: 1.5rem; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; gap: 0.5rem; }
 .summary-card .label { font-size: 0.8rem; color: #7E8286; text-transform: uppercase; font-weight: 600; }
 .summary-card .value { font-size: 1.8rem; font-weight: 800; }
@@ -602,7 +602,7 @@ onMounted(loadData);
 .mini-stat .value.small { font-size: 1.4rem; }
 
 /* Loans Grid */
-.loans-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem; }
+.loans-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr)); gap: 2rem; }
 .loan-card { background: #1A1C1D; border-radius: 16px; border: 1px solid #333; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s; }
 .loan-card:hover { border-color: #444; }
 .overdue-card { border-color: rgba(255, 74, 74, 0.5); box-shadow: 0 0 15px rgba(255, 74, 74, 0.1); }
@@ -670,7 +670,7 @@ onMounted(loadData);
 .status-pill.pending { background: #2A2C2E; color: #7E8286; }
 
 /* Payments Table */
-.payments-table-wrapper { overflow-x: auto; }
+.payments-table-wrapper { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
 .payments-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .payments-table th { text-align: left; padding: 0.75rem; border-bottom: 1px solid #333; color: #7E8286; font-weight: 500; }
 .payments-table td { padding: 0.75rem; border-bottom: 1px solid #222; }
@@ -696,5 +696,38 @@ onMounted(loadData);
   .btn-primary { width: 100%; justify-content: center; }
   .loans-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
+  .payments-table { font-size: 0.8rem; }
+  .payments-table th, .payments-table td { padding: 0.4rem 0.3rem; }
+  .payments-table td small { display: block; font-size: 0.7rem; color: #7E8286; }
+}
+
+@media (max-width: 480px) {
+  .inst-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    text-align: center;
+  }
+  .inst-amounts {
+    text-align: center;
+    border-top: 1px solid #222;
+    border-bottom: 1px solid #222;
+    padding: 0.5rem 0;
+  }
+  .inst-status {
+    align-items: center;
+  }
+  .card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .card-footer .btn {
+    width: 100%;
+  }
+  .admin-actions {
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
 }
 </style>

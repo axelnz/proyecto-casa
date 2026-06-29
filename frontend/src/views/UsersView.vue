@@ -120,7 +120,7 @@ const saveUser = async () => {
     <div v-else-if="error" class="error">{{ error }}</div>
     
     <div v-else class="table-container">
-      <table class="data-table">
+      <table class="data-table responsive-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -134,18 +134,18 @@ const saveUser = async () => {
         </thead>
         <tbody>
           <tr v-for="user in users" :key="user.id">
-            <td>#{{ user.id }}</td>
-            <td class="font-bold">{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>
+            <td data-label="ID">#{{ user.id }}</td>
+            <td data-label="Nombre" class="font-bold">{{ user.name }}</td>
+            <td data-label="Email">{{ user.email }}</td>
+            <td data-label="Rol">
               <span :class="['role-badge', user.role]">{{ user.role }}</span>
             </td>
-            <td>
+            <td data-label="Estado">
               <span :class="['status-dot', user.is_active ? 'active' : 'inactive']"></span>
               {{ user.is_active ? 'Activo' : 'Baja' }}
             </td>
-            <td>${{ formatCurrency(user.default_contribution) }}</td>
-            <td>
+            <td data-label="Aporte Base">${{ formatCurrency(user.default_contribution) }}</td>
+            <td data-label="Acciones">
               <button @click="openEditUserModal(user)" class="btn-text">Editar</button>
             </td>
           </tr>
@@ -216,6 +216,8 @@ const saveUser = async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .header-actions h2 {
@@ -231,6 +233,18 @@ const saveUser = async () => {
   transition: all 0.2s;
 }
 .btn-outline:hover { background: rgba(0, 255, 102, 0.1); }
+
+@media (max-width: 600px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+}
 
 .table-container {
   background-color: #1A1C1D;
@@ -275,14 +289,24 @@ const saveUser = async () => {
   background-color: rgba(0,0,0,0.8);
   display: flex; align-items: center; justify-content: center;
   z-index: 1000;
+  padding: 0.75rem;
 }
 
 .modal {
   background-color: #1A1C1D;
   padding: 2rem;
   border-radius: 12px;
-  width: 100%; max-width: 500px;
+  width: calc(100% - 1.5rem);
+  margin: 0.75rem;
+  max-width: 500px;
   border: 1px solid #333;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 1.5rem;
+  }
 }
 
 .modal h3 { margin-top: 0; color: #FFF; margin-bottom: 1.5rem; }

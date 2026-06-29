@@ -192,6 +192,8 @@ const toggleMonthStatus = async (id, currentStatus) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 .header-actions h2 { margin: 0 0 0.25rem 0; color: #FFF; }
 .subtitle { margin: 0; color: #7E8286; font-size: 0.9rem; }
@@ -203,7 +205,7 @@ const toggleMonthStatus = async (id, currentStatus) => {
 
 /* GRID */
 .cards-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 1.5rem;
 }
 
 .month-card {
@@ -240,16 +242,16 @@ const toggleMonthStatus = async (id, currentStatus) => {
 
 /* MODAL STYLES (Reutilizados globalmente para consistencia) */
 .modal-backdrop {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 0.75rem;
 }
 .modal {
-  background-color: #1A1C1D; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 450px; border: 1px solid #333; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  background-color: #1A1C1D; padding: 2.5rem; border-radius: 12px; width: calc(100% - 1.5rem); margin: 0.75rem; max-width: 450px; border: 1px solid #333; box-shadow: 0 10px 40px rgba(0,0,0,0.5); box-sizing: border-box;
 }
 .modal h3 { margin: 0 0 0.25rem 0; color: #FFF; font-size: 1.4rem; }
 .modal-sub { margin: 0 0 1.5rem 0; color: #7E8286; font-size: 0.9rem; line-height: 1.4; }
 
 .form-grid { display: flex; flex-direction: column; gap: 1.25rem; }
-.form-row { display: flex; gap: 1rem; }
+.form-row { display: flex; gap: 1rem; flex-wrap: wrap; }
 .form-group.half { flex: 1; }
 
 .form-group label { display: block; margin-bottom: 0.4rem; color: #A0A5AA; font-size: 0.85rem; font-weight: 500; }
@@ -267,4 +269,25 @@ const toggleMonthStatus = async (id, currentStatus) => {
 .btn-primary:disabled { background-color: #24272A; color: #555; cursor: not-allowed; transform: none; }
 
 .error-banner { background-color: rgba(255, 74, 74, 0.1); color: #FF4A4A; padding: 0.75rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.9rem; border: 1px solid rgba(255, 74, 74, 0.2); }
+
+@media (max-width: 600px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .header-actions .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 1.5rem;
+  }
+  .form-row .form-group.half {
+    flex: 1 1 100%;
+  }
+}
 </style>
