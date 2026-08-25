@@ -136,7 +136,48 @@
   }
 }
 
-/* Patrón de Tablas Responsivas */
+/* Estilos de Scrollbar Elegantes (Elimina flechas indeseadas y scrollbars feas de Windows) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 rgba(0, 0, 0, 0.2);
+}
+
+/* Patrón de Tablas Responsivas y Ajuste Flexible */
+.table-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background-color: #1A1C1D;
+  -webkit-overflow-scrolling: touch;
+}
+
+.responsive-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.responsive-table th,
+.responsive-table td {
+  word-break: break-word;
+}
+
 @media (max-width: 768px) {
   .responsive-table {
     display: block;
@@ -150,9 +191,10 @@
   .responsive-table td {
     display: block;
     width: 100% !important;
+    box-sizing: border-box;
   }
   .responsive-table tr {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     border: 1px solid #333;
     border-radius: 12px;
     padding: 1rem;
@@ -166,6 +208,7 @@
     border-bottom: 1px solid #2A2C2E;
     text-align: right;
     white-space: normal !important;
+    word-break: break-word;
   }
   .responsive-table td:last-child {
     border-bottom: none;
@@ -178,6 +221,7 @@
     text-transform: uppercase;
     text-align: left;
     margin-right: 1rem;
+    flex-shrink: 0;
   }
   /* Ajustar botones de acción en la versión card de la tabla */
   .responsive-table .action-buttons {
@@ -185,4 +229,5 @@
     width: 100%;
   }
 }
+
 

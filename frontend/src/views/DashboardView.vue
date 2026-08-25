@@ -308,6 +308,45 @@ const handleExportExcel = () => {
         </div>
       </section>
 
+      <!-- Movimientos Recientes del Mes (Últimos tickets cargados PRIMERO) -->
+      <section class="recent-movements">
+        <div class="section-title header-with-link">
+          <h3>Últimos tickets cargados</h3>
+          <RouterLink to="/expenses" class="link-see-all">Ver historial completo &rarr;</RouterLink>
+        </div>
+        
+        <div class="table-container">
+          <table class="data-table responsive-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Cargado por</th>
+                <th>A cuenta de</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="gasto in dashboardData.movimientos_recientes" :key="gasto.id">
+                <td data-label="Fecha">{{ gasto.date.split(' ')[0].split('-').reverse().join('/') }}</td>
+                <td data-label="Concepto">
+                  <span v-if="gasto.concept_name" class="concept-tag">{{ gasto.concept_name }}</span>
+                  <span v-else class="muted">-</span>
+                </td>
+                <td data-label="Descripción" class="font-bold cell-description">{{ gasto.description }}</td>
+                <td data-label="Monto" class="text-emerald font-bold">${{ formatCurrency(gasto.amount) }}</td>
+                <td data-label="Cargado por">{{ gasto.created_by_name }}</td>
+                <td data-label="A cuenta de">{{ gasto.assigned_to_name }}</td>
+              </tr>
+              <tr v-if="dashboardData.movimientos_recientes.length === 0">
+                <td colspan="6" style="text-align: center; color: #777;">No se registraron gastos en este periodo fiscal.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- Miembros / Tarjetas de Progreso -->
       <section class="members-progress">
         <div class="section-title"><h3>Aporte por Familiar</h3></div>
@@ -339,42 +378,6 @@ const handleExportExcel = () => {
             </div>
 
           </div>
-        </div>
-      </section>
-
-      <!-- Movimientos Recientes del Mes -->
-      <section class="recent-movements">
-        <div class="section-title"><h3>Últimos tickets cargados</h3></div>
-        
-        <div class="table-container">
-          <table class="data-table responsive-table">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Concepto</th>
-                <th>Descripción</th>
-                <th>Monto</th>
-                <th>Cargado por</th>
-                <th>A cuenta de</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="gasto in dashboardData.movimientos_recientes" :key="gasto.id">
-                <td data-label="Fecha">{{ gasto.date.split(' ')[0].split('-').reverse().join('/') }}</td>
-                <td data-label="Concepto">
-                  <span v-if="gasto.concept_name" class="concept-tag">{{ gasto.concept_name }}</span>
-                  <span v-else class="muted">-</span>
-                </td>
-                <td data-label="Descripción" class="font-bold">{{ gasto.description }}</td>
-                <td data-label="Monto" class="text-emerald font-bold">${{ formatCurrency(gasto.amount) }}</td>
-                <td data-label="Cargado por">{{ gasto.created_by_name }}</td>
-                <td data-label="A cuenta de">{{ gasto.assigned_to_name }}</td>
-              </tr>
-              <tr v-if="dashboardData.movimientos_recientes.length === 0">
-                <td colspan="6" style="text-align: center; color: #777;">No se registraron gastos en este periodo fiscal.</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </section>
     </div>
@@ -518,10 +521,14 @@ const handleExportExcel = () => {
 .card h3 { margin: 0; font-size: 2rem; color: #FFF; font-weight: 800; letter-spacing: -1px; }
 
 .section-title h3 { color: #FFF; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+.section-title.header-with-link { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+.section-title.header-with-link h3 { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.link-see-all { color: #00FF66; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
+.link-see-all:hover { opacity: 0.8; text-decoration: underline; }
 
 /* MEMBERS GRID */
-.member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
-.member-card { background: #1A1C1D; padding: 1.5rem; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; gap: 1.2rem; }
+.member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; }
+.member-card { background: #1A1C1D; padding: 1.25rem; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; gap: 1rem; }
 .member-header { display: flex; align-items: center; gap: 1rem; }
 .m-avatar { width: 44px; height: 44px; border-radius: 50%; background: #2A2C2E; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: #FFF; }
 .m-info h4 { margin: 0 0 0.25rem 0; color: #FFF; font-size: 1.1rem; }
@@ -544,7 +551,8 @@ const handleExportExcel = () => {
 /* TABLE RECENT */
 .table-container { background-color: #1A1C1D; border-radius: 12px; overflow-x: auto; border: 1px solid #333; margin-bottom: 2rem; }
 .data-table { width: 100%; border-collapse: collapse; text-align: left; }
-.data-table th, .data-table td { padding: 1rem 1.5rem; border-bottom: 1px solid #2A2C2E; }
+.data-table th, .data-table td { padding: 0.85rem 1.1rem; border-bottom: 1px solid #2A2C2E; }
+.cell-description { word-break: break-word; white-space: normal; max-width: 280px; }
 .data-table th { color: #7E8286; font-weight: 500; font-size: 0.85rem; }
 .data-table tr:hover { background-color: #24272A; }
 .font-bold { font-weight: 600; color: #FFF; }

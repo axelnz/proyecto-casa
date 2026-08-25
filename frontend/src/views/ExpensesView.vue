@@ -388,7 +388,7 @@ const handleConfirm = () => {
 /* TABLE COMPLEXITY */
 .table-container { background-color: #1A1C1D; border-radius: 12px; overflow-x: auto; border: 1px solid #333; margin-bottom: 2rem; }
 .data-table { width: 100%; border-collapse: collapse; text-align: left; }
-.data-table th, .data-table td { padding: 1.2rem 1.5rem; border-bottom: 1px solid #2A2C2E; white-space: nowrap; }
+.data-table th, .data-table td { padding: 0.85rem 1rem; border-bottom: 1px solid #2A2C2E; word-break: break-word; }
 .data-table th { color: #7E8286; font-weight: 500; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;}
 .data-table tr:hover { background-color: #24272A; }
 .font-bold { font-weight: 600; color: #FFF; }

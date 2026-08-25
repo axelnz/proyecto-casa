@@ -87,11 +87,12 @@ watch(() => route.path, () => {
 
 /* Sidebar behavior */
 .sidebar {
-  width: 260px;
+  width: 215px;
+  flex-shrink: 0;
   background-color: #1A1C1D;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 1.25rem 1rem;
   border-right: 1px solid #333;
   transition: transform 0.3s ease;
   z-index: 100;
@@ -99,7 +100,8 @@ watch(() => route.path, () => {
 
 .brand h2 {
   color: #fff;
-  margin: 0 0 2rem 0;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.5px;
 }
@@ -111,17 +113,18 @@ watch(() => route.path, () => {
 .nav-links {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex: 1;
 }
 
 .nav-item {
   color: #A0A5AA;
   text-decoration: none;
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 0.85rem;
   border-radius: 8px;
   transition: all 0.2s;
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .nav-item:hover {
@@ -146,20 +149,25 @@ watch(() => route.path, () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .info {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .name {
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .role {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: #7E8286;
 }
 
@@ -168,8 +176,9 @@ watch(() => route.path, () => {
   border: none;
   color: #FF4A4A;
   font-size: 0.85rem;
-  padding: 0.5rem;
+  padding: 0.4rem 0.5rem;
   border-radius: 6px;
+  flex-shrink: 0;
 }
 .logout-btn:hover {
   background-color: rgba(255, 74, 74, 0.1);
@@ -184,8 +193,8 @@ watch(() => route.path, () => {
 }
 
 .top-header {
-  height: 60px;
-  padding: 0 2rem;
+  height: 56px;
+  padding: 0 1.5rem;
   display: flex;
   align-items: center;
   border-bottom: 1px solid #222;
@@ -212,7 +221,7 @@ watch(() => route.path, () => {
 
 .breadcrumbs {
   color: #7E8286;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .breadcrumbs .active {
@@ -221,14 +230,16 @@ watch(() => route.path, () => {
 }
 
 .page-content {
-  padding: 2rem;
+  padding: 1.25rem 1.5rem;
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* RESPONSIVE: Mobile & Tablet */
 @media (max-width: 768px) {
   .sidebar {
+    width: 250px;
     position: fixed;
     top: 0;
     left: 0;
@@ -261,7 +272,7 @@ watch(() => route.path, () => {
   }
 
   .page-content {
-    padding: 1.5rem 1rem;
+    padding: 1rem 0.75rem;
   }
 }
 </style>
