@@ -335,7 +335,7 @@ const handleExportExcel = () => {
                   <span v-else class="muted">-</span>
                 </td>
                 <td data-label="Descripción" class="font-bold cell-description">{{ gasto.description }}</td>
-                <td data-label="Monto" class="text-emerald font-bold">${{ formatCurrency(gasto.amount) }}</td>
+                <td data-label="Monto" class="text-emerald font-bold cell-amount">${{ formatCurrency(Math.abs(gasto.amount)) }}</td>
                 <td data-label="Cargado por">{{ gasto.created_by_name }}</td>
                 <td data-label="A cuenta de">{{ gasto.assigned_to_name }}</td>
               </tr>

@@ -173,9 +173,39 @@
   border-collapse: collapse;
 }
 
-.responsive-table th,
+/* En vista desktop/tabla, prevenimos saltos de línea indeseados en columnas cortas, precios, fechas y badges */
+.responsive-table th {
+  white-space: nowrap;
+}
+
 .responsive-table td {
+  white-space: nowrap;
+}
+
+/* Solo la columna de descripción tiene permitido envolver texto si es extensa */
+.responsive-table td.cell-description,
+.responsive-table td[data-label="Descripción"],
+.responsive-table td[data-label="Descripción / Item"] {
+  white-space: normal;
   word-break: break-word;
+}
+
+/* Montos e importes SIEMPRE en una sola línea sin partir cifras ni decimales */
+.cell-amount,
+.responsive-table td[data-label="Monto"],
+.responsive-table td[data-label="Aporte Base"] {
+  white-space: nowrap !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Etiquetas y chips nunca se rompen a la mitad */
+.concept-tag,
+.badge,
+.role-badge,
+.status-badge,
+.status-chip {
+  white-space: nowrap !important;
+  display: inline-block;
 }
 
 @media (max-width: 768px) {
@@ -204,11 +234,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.6rem 0.5rem;
+    padding: 0.65rem 0.5rem;
     border-bottom: 1px solid #2A2C2E;
     text-align: right;
-    white-space: normal !important;
+    white-space: normal;
     word-break: break-word;
+  }
+  .responsive-table td.cell-amount,
+  .responsive-table td[data-label="Monto"] {
+    white-space: nowrap !important;
   }
   .responsive-table td:last-child {
     border-bottom: none;
@@ -222,6 +256,7 @@
     text-align: left;
     margin-right: 1rem;
     flex-shrink: 0;
+    white-space: nowrap;
   }
   /* Ajustar botones de acción en la versión card de la tabla */
   .responsive-table .action-buttons {

@@ -255,12 +255,12 @@ const handleConfirm = () => {
                 <span v-if="expense.concept_name" class="concept-tag">{{ expense.concept_name }}</span>
                 <span v-else class="muted">-</span>
               </td>
-              <td data-label="Descripción / Item" class="font-bold">{{ expense.description }}</td>
+              <td data-label="Descripción / Item" class="font-bold cell-description">{{ expense.description }}</td>
               <td data-label="Atribuído A">
                 <span class="badge badge-assigned">{{ expense.assigned_to_name }}</span>
               </td>
               <td data-label="Ingresado Por" class="muted">{{ expense.created_by_name }}</td>
-              <td data-label="Monto" class="text-emerald font-bold">${{ formatCurrency(expense.amount) }}</td>
+              <td data-label="Monto" class="text-emerald font-bold cell-amount">${{ formatCurrency(Math.abs(expense.amount)) }}</td>
               <td data-label="Ajustes">
                 <div class="action-buttons" v-if="canEditExpense(expense)">
                   <button @click="openEditModal(expense)" class="btn-icon" title="Editar">✏️</button>
