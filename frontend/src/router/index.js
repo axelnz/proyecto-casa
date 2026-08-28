@@ -59,7 +59,7 @@ const routes = [
       },
       {
         path: 'loans',
-        name: 'Préstamos Felicia',
+        name: 'Préstamos',
         component: LoansView
       },
       {

@@ -59,11 +59,17 @@ CREATE TABLE IF NOT EXISTS loans (
     start_date DATE NOT NULL,
     due_day INTEGER NOT NULL, -- Día del mes que vence (1-31)
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'completed', 'paused')),
+    amortization_type VARCHAR(20) DEFAULT 'simple',
+    annual_interest_rate DECIMAL(7,4) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     updated_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
+
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS amortization_type VARCHAR(20) DEFAULT 'simple';
+ALTER TABLE loans ADD COLUMN IF NOT EXISTS annual_interest_rate DECIMAL(7,4) DEFAULT 0.00;
+
 
 -- 6. Tabla de Pagos de Préstamos
 CREATE TABLE IF NOT EXISTS loan_payments (

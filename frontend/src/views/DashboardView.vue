@@ -49,7 +49,7 @@ const getLocalISOString = (date = new Date()) => {
 const showExpenseModal = ref(false);
 const submittingExpense = ref(false);
 const expenseForm = ref({ 
-  amount: '-', 
+  amount: '', 
   description: '', 
   date: getLocalISOString(), 
   assigned_to_user_id: authStore.currentUser?.id,
@@ -134,7 +134,7 @@ onMounted(() => {
 // Gastos Action
 const openExpenseModal = () => {
   expenseForm.value = { 
-    amount: '-', 
+    amount: '', 
     description: '', 
     date: getLocalISOString(), 
     assigned_to_user_id: authStore.currentUser?.id,

@@ -45,24 +45,25 @@ const findById = async (id) => {
 };
 
 const create = async (loanData) => {
-    const { name, entity, total_amount, installments_count, start_date, due_day, status, created_by_user_id } = loanData;
+    const { name, entity, total_amount, installments_count, start_date, due_day, status, amortization_type, annual_interest_rate, created_by_user_id } = loanData;
     const { rows } = await pool.query(
-        `INSERT INTO loans (name, entity, total_amount, installments_count, start_date, due_day, status, created_by_user_id, updated_by_user_id) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8) RETURNING id`,
-        [name, entity, total_amount, installments_count, start_date, due_day, status || 'active', created_by_user_id]
+        `INSERT INTO loans (name, entity, total_amount, installments_count, start_date, due_day, status, amortization_type, annual_interest_rate, created_by_user_id, updated_by_user_id) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10) RETURNING id`,
+        [name, entity, total_amount, installments_count, start_date, due_day, status || 'active', amortization_type || 'simple', annual_interest_rate || 0, created_by_user_id]
     );
     return rows[0].id;
 };
 
 const update = async (id, loanData) => {
-    const { name, entity, total_amount, installments_count, start_date, due_day, status, updated_by_user_id } = loanData;
+    const { name, entity, total_amount, installments_count, start_date, due_day, status, amortization_type, annual_interest_rate, updated_by_user_id } = loanData;
     const result = await pool.query(
         `UPDATE loans SET 
             name = $1, entity = $2, total_amount = $3, installments_count = $4, 
-            start_date = $5, due_day = $6, status = $7, updated_by_user_id = $8, 
+            start_date = $5, due_day = $6, status = $7, amortization_type = $8, 
+            annual_interest_rate = $9, updated_by_user_id = $10, 
             updated_at = CURRENT_TIMESTAMP 
-         WHERE id = $9`,
-        [name, entity, total_amount, installments_count, start_date, due_day, status, updated_by_user_id, id]
+         WHERE id = $11`,
+        [name, entity, total_amount, installments_count, start_date, due_day, status, amortization_type || 'simple', annual_interest_rate || 0, updated_by_user_id, id]
     );
     return result.rowCount;
 };

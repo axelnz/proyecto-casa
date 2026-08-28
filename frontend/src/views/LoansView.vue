@@ -35,6 +35,8 @@ const loanForm = ref({
   installments_count: '',
   start_date: new Date().toISOString().split('T')[0],
   due_day: 10,
+  amortization_type: 'simple',
+  annual_interest_rate: '',
   status: 'active'
 });
 
@@ -115,19 +117,58 @@ const globalStats = computed(() => {
   return stats;
 });
 
-// Lógica de Cuotas (Generación Visual)
-const getInstallments = (loan) => {
+// Lógica de Cuotas (Generación Visual con Sistemas de Amortización)
+const calculateSchedule = (totalAmount, installmentsCount, startDateStr, dueDay, type = 'simple', annualRate = 0, payments = []) => {
   const installments = [];
-  const startDate = new Date(loan.start_date);
-  const expectedAmount = normalizeMoney(parseFloat(loan.total_amount) / parseInt(loan.installments_count));
-  const payments = loanPayments.value[loan.id] || [];
+  const P = parseFloat(totalAmount) || 0;
+  const n = parseInt(installmentsCount) || 0;
+  if (!P || !n) return [];
 
-  for (let i = 1; i <= loan.installments_count; i++) {
-    const dueDate = new Date(startDate.getFullYear(), startDate.getMonth() + i - 1, loan.due_day);
+  const startDate = new Date(startDateStr);
+  const r = (parseFloat(annualRate) || 0) / 100 / 12; // Tasa de interés mensual
+
+  let balance = P;
+  let fixedPmt = 0;
+  if (type === 'french' && r > 0) {
+    fixedPmt = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  }
+
+  for (let i = 1; i <= n; i++) {
+    const dueDate = new Date(startDate.getFullYear(), startDate.getMonth() + i - 1, parseInt(dueDay) || 10);
+    
+    let expectedAmount = 0;
+    let interestAmount = 0;
+    let capitalAmount = 0;
+
+    if (type === 'french') {
+      if (r > 0) {
+        interestAmount = balance * r;
+        capitalAmount = fixedPmt - interestAmount;
+        expectedAmount = fixedPmt;
+      } else {
+        expectedAmount = P / n;
+        capitalAmount = expectedAmount;
+      }
+    } else if (type === 'german') {
+      capitalAmount = P / n;
+      interestAmount = balance * r;
+      expectedAmount = capitalAmount + interestAmount;
+    } else {
+      // simple
+      expectedAmount = P / n;
+      capitalAmount = expectedAmount;
+    }
+
+    balance = Math.max(0, balance - capitalAmount);
+
+    expectedAmount = normalizeMoney(expectedAmount);
+    capitalAmount = normalizeMoney(capitalAmount);
+    interestAmount = normalizeMoney(interestAmount);
+
     const paidForThis = payments
       .filter(p => p.installment_number === i)
       .reduce((sum, p) => sum + parseFloat(p.amount), 0);
-    
+
     let status = 'pending';
     if (paidForThis >= expectedAmount * 0.99) status = 'paid';
     else if (paidForThis > 0) status = 'partial';
@@ -137,6 +178,8 @@ const getInstallments = (loan) => {
       number: i,
       dueDate,
       expectedAmount,
+      capitalAmount,
+      interestAmount,
       paidAmount: paidForThis,
       status,
       payments: payments.filter(p => p.installment_number === i)
@@ -144,6 +187,31 @@ const getInstallments = (loan) => {
   }
   return installments;
 };
+
+const getInstallments = (loan) => {
+  const payments = loanPayments.value[loan.id] || [];
+  return calculateSchedule(
+    loan.total_amount, 
+    loan.installments_count, 
+    loan.start_date, 
+    loan.due_day, 
+    loan.amortization_type, 
+    loan.annual_interest_rate, 
+    payments
+  );
+};
+
+// Computado para vista previa en el modal de creación / edición de préstamos
+const modalInstallmentPreview = computed(() => {
+  return calculateSchedule(
+    loanForm.value.total_amount,
+    loanForm.value.installments_count,
+    loanForm.value.start_date,
+    loanForm.value.due_day,
+    loanForm.value.amortization_type,
+    loanForm.value.annual_interest_rate
+  );
+});
 
 const getNextDueDate = (loan) => {
   const installments = getInstallments(loan);
@@ -166,6 +234,8 @@ const openNewLoanModal = () => {
     installments_count: '',
     start_date: new Date().toISOString().split('T')[0],
     due_day: 10,
+    amortization_type: 'simple',
+    annual_interest_rate: '',
     status: 'active'
   };
   showLoanModal.value = true;
@@ -175,6 +245,8 @@ const openEditLoanModal = (loan) => {
   editingLoan.value = loan;
   loanForm.value = { 
     ...loan, 
+    amortization_type: loan.amortization_type || 'simple',
+    annual_interest_rate: loan.annual_interest_rate || '',
     start_date: loan.start_date.split('T')[0]
   };
   showLoanModal.value = true;
@@ -310,7 +382,7 @@ onMounted(loadData);
   <div class="loans-view">
     <div class="view-header">
       <div class="title-section">
-        <h1>Préstamos Felicia</h1>
+        <h1>Préstamos</h1>
         <p class="subtitle">Administración de deudas y compromisos familiares</p>
       </div>
       <div class="header-actions" v-if="authStore.isAdmin">
@@ -363,6 +435,9 @@ onMounted(loadData);
             <div class="loan-info">
               <h3>{{ loan.name }}</h3>
               <p class="entity">{{ loan.entity || 'Sin descripción' }}</p>
+              <span class="system-tag">
+                {{ loan.amortization_type === 'french' ? `Sistema Francés (${loan.annual_interest_rate || 0}% TNA)` : loan.amortization_type === 'german' ? `Sistema Alemán (${loan.annual_interest_rate || 0}% TNA)` : 'División Simple' }}
+              </span>
             </div>
             <div class="loan-status">
               <span :class="['status-badge', loan.status]">{{ statusLabels[loan.status] || loan.status }}</span>
@@ -507,6 +582,20 @@ onMounted(loadData);
                 <input v-model="loanForm.due_day" type="number" min="1" max="31" required />
               </div>
             </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Sistema de Amortización</label>
+                <select v-model="loanForm.amortization_type">
+                  <option value="simple">División Simple (Sin Tasa)</option>
+                  <option value="french">Sistema Francés (Cuota Fija)</option>
+                  <option value="german">Sistema Alemán (Cuota Decreciente)</option>
+                </select>
+              </div>
+              <div class="form-group" v-if="loanForm.amortization_type !== 'simple'">
+                <label>Tasa Nominal Anual (TNA %)</label>
+                <input v-model="loanForm.annual_interest_rate" type="number" step="0.01" placeholder="Ej: 71" />
+              </div>
+            </div>
             <div class="form-group">
               <label>Estado</label>
               <select v-model="loanForm.status">
@@ -514,6 +603,19 @@ onMounted(loadData);
                 <option value="paused">Pausado</option>
                 <option value="completed">Finalizado</option>
               </select>
+            </div>
+
+            <!-- Vista previa del Plan de Cuotas -->
+            <div v-if="modalInstallmentPreview.length > 0" class="preview-box">
+              <label class="preview-title">Vista Previa de Cuotas (Primeras 5 de {{ modalInstallmentPreview.length }})</label>
+              <div class="preview-list">
+                <div v-for="inst in modalInstallmentPreview.slice(0, 5)" :key="inst.number" class="preview-item">
+                  <span>Cuota #{{ inst.number }}: <strong>${{ formatCurrency(inst.expectedAmount) }}</strong></span>
+                  <small v-if="loanForm.amortization_type !== 'simple'">
+                    (Cap: ${{ formatCurrency(inst.capitalAmount) }} | Int: ${{ formatCurrency(inst.interestAmount) }})
+                  </small>
+                </div>
+              </div>
             </div>
           </div>
           <div class="modal-actions">
@@ -678,12 +780,12 @@ onMounted(loadData);
 .empty-table { text-align: center; color: #555; padding: 2rem !important; }
 .action-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
-/* Modal Custom Styles (Para el grid de forms) */
-.form-grid { display: flex; flex-direction: column; gap: 1.25rem; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.form-group label { display: block; margin-bottom: 0.5rem; color: #A0A5AA; font-size: 0.85rem; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem 1rem; background: #111; border: 1px solid #333; border-radius: 8px; color: #FFF; font-size: 1rem; }
-.form-group input:focus { border-color: #00FF66; outline: none; }
+.system-tag { display: inline-block; margin-top: 0.3rem; font-size: 0.75rem; color: #00FF66; background: rgba(0, 255, 102, 0.08); padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid rgba(0, 255, 102, 0.2); }
+.preview-box { background: #18191B; border: 1px dashed #333; padding: 1rem; border-radius: 8px; margin-top: 0.5rem; }
+.preview-title { font-size: 0.8rem; color: #00FF66; font-weight: bold; margin-bottom: 0.5rem; display: block; }
+.preview-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 140px; overflow-y: auto; }
+.preview-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: #CCC; padding: 0.3rem 0; border-bottom: 1px solid #222; }
+.preview-item small { color: #888; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
 
 .loading-state { display: flex; flex-direction: column; align-items: center; padding: 5rem; gap: 1rem; color: #7E8286; }
