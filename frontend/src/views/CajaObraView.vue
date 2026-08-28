@@ -2,9 +2,9 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import MoneyInput from '../components/MoneyInput.vue';
+import api from '../api/axios';
 
 const authStore = useAuthStore();
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // ─── Estado ───────────────────────────────────────────────────────────────────
 const fund = ref({ total_amount: 0, description: '' });
@@ -70,24 +70,18 @@ const movementsFiltered = computed(() => {
 
 const filterCategory = ref('');
 
-// ─── API helpers ──────────────────────────────────────────────────────────────
-const headers = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${authStore.token}`,
-});
-
 const fetchAll = async () => {
   loading.value = true;
   error.value = '';
   try {
     const [fundRes, catsRes, movRes] = await Promise.all([
-      fetch(`${API_BASE}/api/fund/fund`, { headers: headers() }),
-      fetch(`${API_BASE}/api/fund/categories`, { headers: headers() }),
-      fetch(`${API_BASE}/api/fund/movements`, { headers: headers() }),
+      api.get('/fund/fund'),
+      api.get('/fund/categories'),
+      api.get('/fund/movements'),
     ]);
-    fund.value = await fundRes.json();
-    categories.value = await catsRes.json();
-    movements.value = await movRes.json();
+    fund.value = fundRes.data;
+    categories.value = catsRes.data;
+    movements.value = movRes.data;
   } catch (e) {
     error.value = 'Error al cargar los datos.';
   } finally {
@@ -120,15 +114,10 @@ const openFundModal = () => {
 
 const saveFund = async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/fund/fund`, {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify({
-        total_amount: parseFloat(String(fundForm.value.total_amount).replace(/\./g, '').replace(',', '.')),
-        description: fundForm.value.description,
-      }),
+    await api.put('/fund/fund', {
+      total_amount: parseFloat(String(fundForm.value.total_amount).replace(/\./g, '').replace(',', '.')),
+      description: fundForm.value.description,
     });
-    if (!res.ok) throw new Error();
     await fetchAll();
     showFundModal.value = false;
   } catch {
@@ -168,11 +157,13 @@ const saveMovement = async () => {
 
   try {
     const url = editingMovement.value
-      ? `${API_BASE}/api/fund/movements/${editingMovement.value.id}`
-      : `${API_BASE}/api/fund/movements`;
-    const method = editingMovement.value ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(body) });
-    if (!res.ok) throw new Error();
+      ? `/fund/movements/${editingMovement.value.id}`
+      : '/fund/movements';
+    if (editingMovement.value) {
+      await api.put(url, body);
+    } else {
+      await api.post(url, body);
+    }
     await fetchAll();
     showMovementModal.value = false;
   } catch {
@@ -196,11 +187,13 @@ const openEditCategory = (c) => {
 const saveCategory = async () => {
   try {
     const url = editingCategory.value
-      ? `${API_BASE}/api/fund/categories/${editingCategory.value.id}`
-      : `${API_BASE}/api/fund/categories`;
-    const method = editingCategory.value ? 'PUT' : 'POST';
-    const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(categoryForm.value) });
-    if (!res.ok) throw new Error();
+      ? `/fund/categories/${editingCategory.value.id}`
+      : '/fund/categories';
+    if (editingCategory.value) {
+      await api.put(url, categoryForm.value);
+    } else {
+      await api.post(url, categoryForm.value);
+    }
     await fetchAll();
     showCategoryModal.value = false;
   } catch {
@@ -218,9 +211,9 @@ const confirmDelete = (item, type) => {
 const executeDelete = async () => {
   try {
     const url = deleteType.value === 'movement'
-      ? `${API_BASE}/api/fund/movements/${deletingItem.value.id}`
-      : `${API_BASE}/api/fund/categories/${deletingItem.value.id}`;
-    await fetch(url, { method: 'DELETE', headers: headers() });
+      ? `/fund/movements/${deletingItem.value.id}`
+      : `/fund/categories/${deletingItem.value.id}`;
+    await api.delete(url);
     await fetchAll();
     showDeleteConfirm.value = false;
   } catch {
