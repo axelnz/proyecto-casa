@@ -130,7 +130,7 @@ const calculateSchedule = (totalAmount, installmentsCount, startDateStr, dueDay,
 
   let balance = P;
   let fixedPmt = 0;
-  if (type === 'french' && r > 0) {
+  if (type === 'german' && r > 0) {
     fixedPmt = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
   }
 
@@ -142,6 +142,12 @@ const calculateSchedule = (totalAmount, installmentsCount, startDateStr, dueDay,
     let capitalAmount = 0;
 
     if (type === 'french') {
+      // Sistema Francés (Cuota Decreciente): Capital fijo + Interés sobre saldo deudor
+      capitalAmount = P / n;
+      interestAmount = balance * r;
+      expectedAmount = capitalAmount + interestAmount;
+    } else if (type === 'german') {
+      // Sistema Alemán (Cuota Fija): Cuota constante
       if (r > 0) {
         interestAmount = balance * r;
         capitalAmount = fixedPmt - interestAmount;
@@ -150,10 +156,6 @@ const calculateSchedule = (totalAmount, installmentsCount, startDateStr, dueDay,
         expectedAmount = P / n;
         capitalAmount = expectedAmount;
       }
-    } else if (type === 'german') {
-      capitalAmount = P / n;
-      interestAmount = balance * r;
-      expectedAmount = capitalAmount + interestAmount;
     } else {
       // simple
       expectedAmount = P / n;
@@ -588,8 +590,8 @@ onMounted(loadData);
                 <label>Sistema de Amortización</label>
                 <select v-model="loanForm.amortization_type">
                   <option value="simple">División Simple (Sin Tasa)</option>
-                  <option value="french">Sistema Francés (Cuota Fija)</option>
-                  <option value="german">Sistema Alemán (Cuota Decreciente)</option>
+                  <option value="french">Sistema Francés (Cuota Decreciente)</option>
+                  <option value="german">Sistema Alemán (Cuota Fija)</option>
                 </select>
               </div>
               <div class="form-group" v-if="loanForm.amortization_type !== 'simple'">
