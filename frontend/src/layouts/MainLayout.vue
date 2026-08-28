@@ -42,6 +42,7 @@ watch(() => route.path, () => {
         <RouterLink to="/months" class="nav-item" active-class="active-link">Meses</RouterLink>
         <RouterLink to="/expenses" class="nav-item" active-class="active-link">Historial Gastos</RouterLink>
         <RouterLink to="/loans" class="nav-item" active-class="active-link">Préstamos</RouterLink>
+        <RouterLink to="/caja-obra" class="nav-item nav-item-obra" active-class="active-link">🏗️ Caja de Obra</RouterLink>
         <RouterLink v-if="authStore.isAdmin" to="/users" class="nav-item admin-only" active-class="active-link">Usuarios (Admin)</RouterLink>
       </nav>
       

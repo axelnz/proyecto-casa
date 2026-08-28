@@ -53,6 +53,7 @@ app.use('/api/months', require('./src/routes/monthRoutes'));
 app.use('/api/expenses', require('./src/routes/expenseRoutes'));
 app.use('/api/concepts', require('./src/routes/conceptRoutes'));
 app.use('/api/loans', require('./src/routes/loanRoutes'));
+app.use('/api/fund', require('./src/routes/fundRoutes'));
 
 
 const PORT = process.env.PORT || 3000;

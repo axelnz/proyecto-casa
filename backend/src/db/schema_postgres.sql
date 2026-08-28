@@ -86,3 +86,42 @@ CREATE TABLE IF NOT EXISTS loan_payments (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
+
+-- 7. Tabla del Fondo de Obra (saldo total configurable)
+CREATE TABLE IF NOT EXISTS construction_fund (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    total_amount DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    description TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT single_row CHECK (id = 1) -- Solo puede existir una fila
+);
+
+-- 8. Categorías de gastos del fondo
+CREATE TABLE IF NOT EXISTS fund_categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    color VARCHAR(7) DEFAULT '#00FF66',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Categorías por defecto
+INSERT INTO fund_categories (name, color) VALUES 
+    ('Materiales', '#3B82F6'),
+    ('Mano de obra', '#F59E0B'),
+    ('Equipos y herramientas', '#8B5CF6'),
+    ('Transporte', '#EC4899'),
+    ('Otros', '#6B7280')
+ON CONFLICT DO NOTHING;
+
+-- 9. Movimientos del fondo (gastos registrados)
+CREATE TABLE IF NOT EXISTS fund_movements (
+    id SERIAL PRIMARY KEY,
+    amount DECIMAL(15,2) NOT NULL,
+    description VARCHAR(500) NOT NULL,
+    date DATE NOT NULL,
+    category_id INTEGER REFERENCES fund_categories(id) ON DELETE SET NULL,
+    created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

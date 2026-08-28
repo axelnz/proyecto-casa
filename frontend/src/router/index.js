@@ -10,6 +10,7 @@ const ExpensesView = () => import('../views/ExpensesView.vue');
 const ImportView = () => import('../views/ImportView.vue');
 const LoansView = () => import('../views/LoansView.vue');
 const ConceptsView = () => import('../views/ConceptsView.vue');
+const CajaObraView = () => import('../views/CajaObraView.vue');
 
 const AuthLayout = () => import('../layouts/AuthLayout.vue');
 const MainLayout = () => import('../layouts/MainLayout.vue');
@@ -66,6 +67,11 @@ const routes = [
         path: 'concepts',
         name: 'Conceptos',
         component: ConceptsView
+      },
+      {
+        path: 'caja-obra',
+        name: 'Caja de Obra',
+        component: CajaObraView
       }
     ]
   },
