@@ -6,6 +6,7 @@ import api from '../api/axios';
 import { formatCurrency, normalizeMoney } from '../utils/formatters';
 import ConfirmModal from '../components/ConfirmModal.vue';
 import ActionButton from '../components/ActionButton.vue';
+import MoneyInput from '../components/MoneyInput.vue';
 import { exportExpensesToExcel } from '../utils/excelExport';
 
 const authStore = useAuthStore();
@@ -393,10 +394,7 @@ const handleExportExcel = () => {
             <!-- 1. Monto -->
             <div class="form-group big-input">
               <label>Monto</label>
-              <div class="input-money-wrapper">
-                <span class="currency-symbol">$</span>
-                <input v-model="expenseForm.amount" type="text" placeholder="0.00" required autofocus />
-              </div>
+              <MoneyInput v-model="expenseForm.amount" required autofocus />
             </div>
 
             <!-- 2. Concepto -->

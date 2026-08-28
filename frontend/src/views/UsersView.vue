@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import api from '../api/axios';
 import { formatCurrency } from '../utils/formatters';
+import MoneyInput from '../components/MoneyInput.vue';
 
 const users = ref([]);
 const loading = ref(true);
@@ -187,7 +188,7 @@ const saveUser = async () => {
 
             <div class="form-group">
               <label>Aporte Mensual Base ($)</label>
-              <input v-model="form.default_contribution" type="number" step="0.01" required />
+              <MoneyInput v-model="form.default_contribution" required />
             </div>
 
             <div v-if="isEditing" class="form-group checkbox-group">

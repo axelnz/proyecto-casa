@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/authStore';
 import api from '../api/axios';
 import { formatCurrency, normalizeMoney } from '../utils/formatters';
 import ConfirmModal from '../components/ConfirmModal.vue';
+import MoneyInput from '../components/MoneyInput.vue';
 
 const authStore = useAuthStore();
 const loans = ref([]);
@@ -565,7 +566,7 @@ onMounted(loadData);
             <div class="form-row">
               <div class="form-group">
                 <label>Monto Total</label>
-                <input v-model="loanForm.total_amount" type="number" step="0.01" required />
+                <MoneyInput v-model="loanForm.total_amount" required />
               </div>
               <div class="form-group">
                 <label>Cuotas</label>
@@ -636,7 +637,7 @@ onMounted(loadData);
           <div class="form-grid">
             <div class="form-group">
               <label>Monto Pagado</label>
-              <input v-model="paymentForm.amount" type="number" step="0.01" required autofocus />
+              <MoneyInput v-model="paymentForm.amount" required autofocus />
             </div>
             <div class="form-row">
               <div class="form-group">
