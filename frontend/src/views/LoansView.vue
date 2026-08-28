@@ -781,12 +781,31 @@ onMounted(loadData);
 .action-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
 .system-tag { display: inline-block; margin-top: 0.3rem; font-size: 0.75rem; color: #00FF66; background: rgba(0, 255, 102, 0.08); padding: 0.2rem 0.6rem; border-radius: 6px; border: 1px solid rgba(0, 255, 102, 0.2); }
-.preview-box { background: #18191B; border: 1px dashed #333; padding: 1rem; border-radius: 8px; margin-top: 0.5rem; }
+
+/* Form & Modal Layout Styles */
+.form-grid { display: flex; flex-direction: column; gap: 1.25rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; text-align: left; }
+.form-group label { display: block; color: #A0A5AA; font-size: 0.85rem; font-weight: 600; }
+.form-group input, .form-group select, .form-group textarea { 
+  width: 100%; 
+  padding: 0.75rem 1rem; 
+  background: #111; 
+  border: 1px solid #333; 
+  border-radius: 8px; 
+  color: #FFF; 
+  font-size: 0.95rem; 
+  box-sizing: border-box; 
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #00FF66; outline: none; }
+
+.preview-box { background: #18191B; border: 1px dashed #333; padding: 1rem; border-radius: 8px; margin-top: 0.5rem; text-align: left; }
 .preview-title { font-size: 0.8rem; color: #00FF66; font-weight: bold; margin-bottom: 0.5rem; display: block; }
 .preview-list { display: flex; flex-direction: column; gap: 0.4rem; max-height: 140px; overflow-y: auto; }
 .preview-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: #CCC; padding: 0.3rem 0; border-bottom: 1px solid #222; }
 .preview-item small { color: #888; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
 
 .loading-state { display: flex; flex-direction: column; align-items: center; padding: 5rem; gap: 1rem; color: #7E8286; }
 .spinner { width: 40px; height: 40px; border: 4px solid rgba(0,255,102,0.1); border-top: 4px solid #00FF66; border-radius: 50%; animation: spin 1s linear infinite; }
