@@ -99,7 +99,15 @@ const formatMoney = (n) => {
 
 const formatDate = (d) => {
   if (!d) return '';
-  const date = new Date(d + 'T12:00:00');
+
+  const dateOnlyMatch = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return `${day}/${month}/${year}`;
+  }
+
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return '';
   return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
@@ -296,29 +304,6 @@ const executeDelete = async () => {
         </div>
       </div>
 
-      <!-- Gastos por categoría -->
-      <div v-if="spentByCategory.length" class="category-breakdown">
-        <h3>Por categoría</h3>
-        <div class="category-bars">
-          <div v-for="cat in spentByCategory" :key="cat.name" class="cat-row">
-            <div class="cat-info">
-              <span class="cat-dot" :style="{ background: cat.color }"></span>
-              <span class="cat-name">{{ cat.name }}</span>
-            </div>
-            <div class="cat-bar-wrap">
-              <div
-                class="cat-bar"
-                :style="{
-                  width: totalSpent > 0 ? (cat.total / totalSpent * 100) + '%' : '0%',
-                  background: cat.color
-                }"
-              ></div>
-            </div>
-            <span class="cat-amount">{{ formatMoney(cat.total) }}</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Tabs: Movimientos / Categorías -->
       <div class="tabs">
         <button
@@ -408,6 +393,29 @@ const executeDelete = async () => {
               <button class="action-btn edit" @click="openEditCategory(c)">✏️</button>
               <button class="action-btn delete" @click="confirmDelete(c, 'category')">🗑️</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gastos por categoría -->
+      <div v-if="spentByCategory.length" class="category-breakdown">
+        <h3>Por categoría</h3>
+        <div class="category-bars">
+          <div v-for="cat in spentByCategory" :key="cat.name" class="cat-row">
+            <div class="cat-info">
+              <span class="cat-dot" :style="{ background: cat.color }"></span>
+              <span class="cat-name">{{ cat.name }}</span>
+            </div>
+            <div class="cat-bar-wrap">
+              <div
+                class="cat-bar"
+                :style="{
+                  width: totalSpent > 0 ? (cat.total / totalSpent * 100) + '%' : '0%',
+                  background: cat.color
+                }"
+              ></div>
+            </div>
+            <span class="cat-amount">{{ formatMoney(cat.total) }}</span>
           </div>
         </div>
       </div>
@@ -638,6 +646,7 @@ const executeDelete = async () => {
   border: 1px solid #2a2d30;
   border-radius: 12px;
   padding: 1.2rem 1.5rem;
+  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
 }
 .category-breakdown h3 { font-size: 0.9rem; color: #7E8286; font-weight: 600; margin: 0 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
