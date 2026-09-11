@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+const { rateLimitKey } = require('./src/config/rateLimitKey');
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api/system', require('./src/routes/systemRoutes')());
 
 // 3. Rate Limiting: Limitar peticiones para prevenir ataques de fuerza bruta
 const apiLimiter = rateLimit({
+    keyGenerator: rateLimitKey,
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 100, // Límite de 100 peticiones por IP
     message: { error: 'Demasiadas peticiones desde esta IP. Intenta nuevamente en 15 minutos.' }

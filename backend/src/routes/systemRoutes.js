@@ -1,6 +1,7 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const { Pool } = require('pg');
+const { rateLimitKey } = require('../config/rateLimitKey');
 const { createSystemService, SystemError } = require('../services/systemService');
 
 // A bounded, read-only probe separate from the application's initialization query.
@@ -36,10 +37,12 @@ function createSystemRouter(system = service) {
     next();
   });
   const statusLimiter = rateLimit({
+    keyGenerator: rateLimitKey,
     windowMs: 60 * 1000, limit: 60, standardHeaders: 'draft-7', legacyHeaders: false,
     message: { error: 'Demasiadas comprobaciones. Esperá un minuto.' }
   });
   const wakeLimiter = rateLimit({
+    keyGenerator: rateLimitKey,
     windowMs: 15 * 60 * 1000, limit: 5, standardHeaders: 'draft-7', legacyHeaders: false,
     message: { error: 'Demasiados intentos de activación. Esperá 15 minutos.' }
   });

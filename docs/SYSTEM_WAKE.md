@@ -42,6 +42,7 @@ Incluso restringido al proyecto, el permiso Project Settings de lectura/escritur
 - El frontend consulta cada cinco segundos, admite el arranque de Render, detiene las consultas al salir y no repite un POST de resultado incierto. No reintenta logins ni escrituras de negocio.
 - Los límites y la deduplicación viven en memoria de una instancia de Node. Si se escala a varias réplicas, usar un store/lock compartido independiente de Supabase antes de habilitar la activación. Los reinicios del proceso también reinician esos límites.
 - Verificar `TRUST_PROXY` en Render para que la IP del cliente sea correcta sin confiar en encabezados falsificados. No establecer `true` sin validar la cadena de proxies.
+- En Render (`RENDER=true`, variable automática del hosting), los límites usan `CF-Connecting-IP`, suministrado por su entrada pública de Cloudflare. Ignoran `X-Forwarded-For` para evitar contadores distintos por proxies o encabezados manipulados. Si el encabezado falta o es inválido, usan la IP de la conexión; fuera de Render, usan `req.ip` con la configuración de proxies correspondiente. IPv6 se agrupa por subred /56.
 
 ## Validación
 
@@ -68,3 +69,5 @@ Las siete tablas conservan el orden inicial recibido. El primer clic en una colu
 - [Tokens personales](https://supabase.com/docs/guides/platform/personal-access-tokens)
 - [Pausa de proyectos](https://supabase.com/docs/guides/platform/free-project-pausing)
 - [Arranque de Render Free](https://render.com/docs/free)
+- [IP del cliente detrás de Cloudflare en Render](https://render.com/articles/host-pocketbase-on-render)
+- [Variables automáticas de Render](https://render.com/docs/environment-variables)
