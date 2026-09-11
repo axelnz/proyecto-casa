@@ -6,8 +6,7 @@ const createSystemRouter = require('../src/routes/systemRoutes');
 
 const env = {
   SUPABASE_PROJECT_REF: 'abcdefghijklmnopqrst',
-  SUPABASE_MANAGEMENT_TOKEN: 'test-management-token',
-  SYSTEM_WAKE_CODE: 'test-family-code-123'
+  SUPABASE_MANAGEMENT_TOKEN: 'test-management-token'
 };
 function fixture(overrides = {}) {
   let time = 0;
@@ -32,32 +31,30 @@ test('a healthy database works without administrative credentials or management 
   assert.equal(f.requests.length, 0);
 });
 
-test('missing configuration, short code and injected project path fail closed', async () => {
-  for (const config of [{}, { ...env, SYSTEM_WAKE_CODE: 'short' }, { ...env, SUPABASE_PROJECT_REF: '../other' }]) {
+test('missing administrative configuration and injected project path fail closed', async () => {
+  for (const config of [{}, { ...env, SUPABASE_MANAGEMENT_TOKEN: '' }, { ...env, SUPABASE_PROJECT_REF: '../other' }]) {
     const f = fixture({ env: config });
     assert.equal((await f.service.getStatus()).state, 'unavailable');
-    await assert.rejects(f.service.restore(env.SYSTEM_WAKE_CODE), { status: 503 });
+    await assert.rejects(f.service.restore(), { status: 503 });
     assert.equal(f.requests.length, 0);
   }
 });
 
-test('incorrect activation code is rejected before querying Supabase or the database', async () => {
+test('public activation works without a user session or activation code', async () => {
   let probes = 0;
   const f = fixture({ checkDatabase: async () => { probes++; return false; } });
-  for (const code of [undefined, {}, '', 'incorrect']) {
-    await assert.rejects(f.service.restore(code), { status: 403 });
-  }
-  assert.equal(probes, 0);
-  assert.equal(f.requests.length, 0);
+  assert.equal((await f.service.restore()).state, 'restoring');
+  assert.equal(probes, 1);
+  assert.equal(f.requests.filter(req => req.method === 'POST').length, 1);
 });
 
 test('paused project receives a single restore despite concurrent requests and stale state', async () => {
   const f = fixture();
   assert.equal((await f.service.getStatus()).state, 'paused');
-  const statuses = await Promise.all(Array.from({ length: 8 }, () => f.service.restore(env.SYSTEM_WAKE_CODE)));
+  const statuses = await Promise.all(Array.from({ length: 8 }, () => f.service.restore()));
   assert.ok(statuses.every(status => status.state === 'restoring'));
   assert.equal(f.requests.filter(req => req.method === 'POST').length, 1);
-  await f.service.restore(env.SYSTEM_WAKE_CODE);
+  await f.service.restore();
   assert.equal(f.requests.filter(req => req.method === 'POST').length, 1);
   assert.equal(f.requests.find(req => req.method === 'POST').url, 'https://api.supabase.com/v1/projects/abcdefghijklmnopqrst/restore');
 });
@@ -68,9 +65,9 @@ test('lost restore response retains cooldown and does not resend the operation',
     if (options.method === 'POST') { posts++; throw new Error('connection lost'); }
     return { ok: true, json: async () => ({ status: 'INACTIVE' }) };
   } });
-  await assert.rejects(f.service.restore(env.SYSTEM_WAKE_CODE), { status: 503 });
+  await assert.rejects(f.service.restore(), { status: 503 });
   f.advance(10000);
-  assert.equal((await f.service.restore(env.SYSTEM_WAKE_CODE)).state, 'restoring');
+  assert.equal((await f.service.restore()).state, 'restoring');
   assert.equal(posts, 1);
 });
 
@@ -78,7 +75,7 @@ test('Healthy in Supabase alone is insufficient: a database query must succeed',
   const f = fixture();
   f.setProject('ACTIVE_HEALTHY');
   assert.equal((await f.service.getStatus()).state, 'checking_database');
-  await f.service.restore(env.SYSTEM_WAKE_CODE);
+  await f.service.restore();
   assert.equal(f.requests.filter(req => req.method === 'POST').length, 0);
   f.setHealthy(true);
   f.advance(6000);
@@ -89,7 +86,7 @@ test('restoring, unknown and failed project states never trigger a restore', asy
   for (const state of ['RESTORING', 'COMING_UP', 'PAUSING', 'UPGRADING', 'INIT_FAILED', 'REMOVED', 'NEW_UNKNOWN_STATE']) {
     const f = fixture();
     f.setProject(state);
-    assert.notEqual((await f.service.restore(env.SYSTEM_WAKE_CODE)).state, 'ready');
+    assert.notEqual((await f.service.restore()).state, 'ready');
     assert.equal(f.requests.filter(req => req.method === 'POST').length, 0);
   }
 });
@@ -126,31 +123,35 @@ async function withServer(callback) {
   try { await callback(base, f); } finally { await new Promise(resolve => server.close(resolve)); }
 }
 
-test('HTTP endpoints work before login, require the wake code and do not leak secrets', async () => {
+test('public HTTP activation ignores caller-supplied projects and does not leak secrets', async () => {
   await withServer(async (base, f) => {
     const status = await fetch(`${base}/status`);
     assert.equal(status.headers.get('cache-control'), 'no-store');
     assert.deepEqual(Object.keys(await status.json()).sort(), ['canWake', 'message', 'state']);
-    const denied = await fetch(`${base}/wake`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ activationCode: 'wrong' }) });
-    assert.equal(denied.status, 403);
-    const accepted = await fetch(`${base}/wake`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ activationCode: env.SYSTEM_WAKE_CODE, projectRef: 'other-project' }) });
+    const accepted = await fetch(`${base}/wake`, { method: 'POST' });
     assert.equal(accepted.status, 202);
     assert.equal((await accepted.json()).state, 'restoring');
+    const injected = await fetch(`${base}/wake`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectRef: 'other-project', action: 'delete', url: 'https://example.com' }) });
+    assert.equal(injected.status, 202);
+    assert.ok(!(await injected.text()).includes(env.SUPABASE_MANAGEMENT_TOKEN));
     assert.equal(f.requests.filter(req => req.method === 'POST').length, 1);
+    assert.equal(f.requests.find(req => req.method === 'POST').url, 'https://api.supabase.com/v1/projects/abcdefghijklmnopqrst/restore');
   });
 });
 
 test('wake has an independent attempt limit and rejects oversized/malformed bodies', async () => {
   await withServer(async base => {
-    for (const body of ['{"activationCode":', JSON.stringify({ activationCode: 'x'.repeat(1500) })]) {
+    for (const body of ['{"invalid":', JSON.stringify({ invalid: 'x'.repeat(1500) })]) {
       const response = await fetch(`${base}/wake`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
       assert.ok([400, 413].includes(response.status));
       assert.deepEqual(await response.json(), { error: 'Solicitud de activación inválida.' });
     }
     for (let i = 0; i < 3; i++) {
-      assert.equal((await fetch(`${base}/wake`, { method: 'POST' })).status, 403);
+      assert.equal((await fetch(`${base}/wake`, { method: 'POST' })).status, 202);
     }
     assert.equal((await fetch(`${base}/wake`, { method: 'POST' })).status, 429);
-    assert.equal((await fetch(`${base}/status`)).status, 200);
+    const status = await fetch(`${base}/status`);
+    assert.equal(status.status, 202);
+    assert.equal((await status.json()).state, 'restoring');
   });
 });

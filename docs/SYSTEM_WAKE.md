@@ -1,6 +1,6 @@
 # Activación desde la app
 
-El login permite comprobar el servidor y reactivar un proyecto Supabase pausado. También aparece la comprobación dentro de la app si falla la conexión o una solicitud devuelve un error 5xx. El usuario ingresa un **código de activación independiente**; nunca su contraseña de Supabase. Después de verificar la conexión a la tabla de usuarios, la página vuelve a cargar `/login`, cierra cualquier sesión local anterior y enfoca la contraseña.
+El login permite comprobar el servidor y reactivar un proyecto Supabase pausado con un **botón público, sin código de activación**. Cualquier persona con el enlace puede solicitar que se despierte el proyecto. También aparece la comprobación dentro de la app si falla la conexión o una solicitud devuelve un error 5xx. Después de verificar la conexión a la tabla de usuarios, la página vuelve a cargar `/login`, cierra cualquier sesión local anterior y enfoca la contraseña.
 
 Supabase acepta una solicitud de restore y expone estados, pero no un porcentaje de avance. La UI muestra etapas y una barra indeterminada. La espera se limita a cinco minutos por intento. Un timeout no cancela una restauración en curso; el siguiente intento comprueba el estado primero.
 
@@ -18,23 +18,22 @@ Configurar estas variables **en el servicio backend de Render** y volver a despl
 | --- | --- |
 | `SUPABASE_PROJECT_REF` | `oqsgvmpvnluppzofjnjf` |
 | `SUPABASE_MANAGEMENT_TOKEN` | Token de Management API autorizado para consultar y reactivar ese proyecto |
-| `SYSTEM_WAKE_CODE` | Código aleatorio de 12 a 256 caracteres compartido solo con quienes pueden activarlo |
 | `DATABASE_URL` | Mantener la conexión actual a la misma base |
 | `CORS_ORIGIN` | Incluir el origen exacto del frontend |
 | `TRUST_PROXY` | Ajustar a la topología real del proxy; usar direcciones/subredes confiables o número de saltos verificado |
 
-En Vercel mantener `VITE_API_BASE_URL=https://proyecto-casa-api.onrender.com/api`. **No publicar el token administrativo ni el código en variables `VITE_`, JavaScript, Git o logs.** Publicar primero la API y luego el frontend.
+En Vercel mantener `VITE_API_BASE_URL=https://proyecto-casa-api.onrender.com/api`. **No publicar el token administrativo en variables `VITE_`, JavaScript, Git o logs.** Publicar primero la API y luego el frontend.
 
 El token se genera desde la sección de access tokens de Supabase. Usar, si la cuenta lo permite, un token restringido al proyecto con `project_admin_read` y `project_admin_write` (OAuth: `projects:read` y `projects:write`). Si solo hay tokens personales clásicos, heredan los permisos de la cuenta: evaluar su alcance antes de emitirlos, usar una identidad con acceso limitado y prever su revocación/rotación. Las claves `anon` y `service_role` no reemplazan un token de Management API. No es necesario guardar la contraseña de la cuenta de Supabase.
 
-El código de activación concede solo la operación implementada de despertar este proyecto; no autentica al usuario ni permite leer datos financieros. Debe configurarse explícitamente, no tiene valor por defecto y la función falla cerrada si falta. Con la base disponible, el login y la comprobación funcionan aunque esta opción no esté configurada.
+La operación pública permite únicamente despertar el proyecto configurado: no inicia sesión ni permite leer datos financieros. Las rutas de negocio conservan su autenticación. El botón tampoco permite pausar, borrar, reiniciar ni seleccionar otro proyecto. Una persona con el enlace puede reactivar un proyecto pausado intencionalmente por el administrador; este comportamiento público es parte del alcance solicitado. Si falta la configuración administrativa, la activación falla cerrada. Con la base disponible, el login y la comprobación siguen funcionando.
 
 Incluso restringido al proyecto, el permiso Project Settings de lectura/escritura incluye otras operaciones administrativas (como pausar o borrar el proyecto). Supabase no ofrece en este grupo un permiso exclusivo de despertar. La aplicación expone solamente la reactivación y no permite seleccionar otra operación, pero el token requiere protección como cualquier secreto administrativo.
 
 ## Controles implementados
 
 - `GET /api/system/status`: consulta de solo lectura, salida mínima, sin IDs, hosts ni secretos; máximo 60 solicitudes por IP/minuto, caché de 5 segundos y una comprobación concurrente por proceso.
-- `POST /api/system/wake`: verifica el código con comparación de hash en tiempo constante; máximo 5 intentos por IP/15 minutos; JSON de hasta 1 KB.
+- `POST /api/system/wake`: público, sin código ni JWT; máximo 5 intentos por IP/15 minutos; JSON de hasta 1 KB. Ignora los parámetros que pueda enviar el cliente y conserva fija la operación y el proyecto.
 - El servidor llama únicamente a la URL fija de Supabase y al proyecto configurado. El cliente no puede elegir un proyecto, URL ni operación administrativa.
 - Solo envía restore para `INACTIVE`, evita solicitudes concurrentes y aplica cinco minutos de espera incluso si se pierde la respuesta. Nunca pausa ni reinicia un proyecto activo.
 - La comprobación usa un pool separado, una conexión y timeouts de conexión/consulta de cuatro segundos. No inicializa tablas ni lee filas de usuarios en la respuesta HTTP.
@@ -56,7 +55,7 @@ npm test --prefix frontend
 npm run build:frontend
 ```
 
-Los tests simulan la API de Supabase; no pausan ni restauran la base real. Para comprobar el despliegue, usar primero el estado actual: debe mostrar listo cuando la conexión a la base funciona. Probar una reactivación real cuando el proyecto esté pausado, verificando que el código incorrecto sea rechazado y que el correcto llegue a listo antes de recargar. No pausar producción como parte de una prueba automática.
+Los tests simulan la API de Supabase; no pausan ni restauran la base real. Para comprobar el despliegue, usar primero el estado actual: debe mostrar listo cuando la conexión a la base funciona. Probar una reactivación real cuando el proyecto esté pausado, verificando que un solo clic sin credenciales llegue a listo antes de recargar. No pausar producción como parte de una prueba automática.
 
 ## Ordenamiento de tablas
 

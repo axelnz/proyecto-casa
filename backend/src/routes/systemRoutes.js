@@ -57,7 +57,7 @@ function createSystemRouter(system = service) {
     }
   };
   router.get('/status', statusLimiter, handle(() => system.getStatus()));
-  router.post('/wake', wakeLimiter, express.json({ limit: '1kb' }), handle(req => system.restore(req.body?.activationCode)));
+  router.post('/wake', wakeLimiter, express.json({ limit: '1kb' }), handle(() => system.restore()));
   router.use((error, req, res, next) => {
     res.status(error.type === 'entity.too.large' ? 413 : 400).json({ error: 'Solicitud de activación inválida.' });
   });

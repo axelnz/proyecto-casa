@@ -15,7 +15,7 @@ export function waitForRetry(ms, signal) {
 
 // Poll status only. Never repeat login, writes or an uncertain restore request.
 export async function monitorSystem({
-  getStatus, restore, onStatus, activationCode, signal,
+  getStatus, restore, onStatus, signal,
   maxWaitMs = 5 * 60 * 1000, intervalMs = 5000, now = Date.now, sleep = waitForRetry
 }) {
   const started = now();
@@ -38,12 +38,11 @@ export async function monitorSystem({
     if (status.state === 'ready') return status;
     if (status.state === 'unavailable') throw new Error(status.message);
     if (status.state === 'paused' && !restoreAttempted) {
-      if (!activationCode) return status;
       restoreAttempted = true;
       onStatus({ state: 'restoring', message: 'Solicitando la activación del sistema…' });
       let restored;
       try {
-        restored = await restore(activationCode, signal);
+        restored = await restore(signal);
       } catch (error) {
         if (signal?.aborted) throw error;
         if (error.response && ![502, 503, 504].includes(error.response.status)) throw error;

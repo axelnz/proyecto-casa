@@ -1,5 +1,3 @@
-const { createHash, timingSafeEqual } = require('node:crypto');
-
 const RESTORE_COOLDOWN_MS = 5 * 60 * 1000;
 const CACHE_MS = 5000;
 const TRANSITION_STATES = new Set(['RESTORING', 'COMING_UP', 'UPGRADING', 'PAUSING']);
@@ -14,8 +12,7 @@ class SystemError extends Error {
 function createSystemService({ env = process.env, checkDatabase, fetchImpl = fetch, now = Date.now }) {
   const projectRef = env.SUPABASE_PROJECT_REF || '';
   const token = env.SUPABASE_MANAGEMENT_TOKEN || '';
-  const activationCode = env.SYSTEM_WAKE_CODE || '';
-  const configured = /^[a-z]{20}$/.test(projectRef) && !!token && activationCode.length >= 12 && activationCode.length <= 256;
+  const configured = /^[a-z]{20}$/.test(projectRef) && !!token;
   let cached;
   let cacheUntil = 0;
   let statusRequest;
@@ -79,18 +76,9 @@ function createSystemService({ env = process.env, checkDatabase, fetchImpl = fet
     return statusRequest;
   }
 
-  function authorize(code) {
+  async function restore() {
+    // Public activation of this configured project only; business data still requires login.
     if (!configured) throw new SystemError(503, 'El administrador debe configurar la activación desde la app.');
-    const supplied = typeof code === 'string' && code.length <= 256 ? code : '';
-    const digest = text => createHash('sha256').update(text).digest();
-    if (!timingSafeEqual(digest(supplied), digest(activationCode))) {
-      throw new SystemError(403, 'El código de activación no es correcto.');
-    }
-  }
-
-  async function restore(code) {
-    // Does not depend on users, sessions or a connection to the sleeping database.
-    authorize(code);
     if (restoreRequest) return restoreRequest;
     restoreRequest = (async () => {
       const status = await getStatus();

@@ -7,9 +7,7 @@ const emit = defineEmits(['busy', 'ready']);
 const state = ref('checking');
 const message = ref('Comprobando disponibilidad…');
 const error = ref('');
-const activationCode = ref('');
 const busy = ref(false);
-const needsCode = ref(false);
 let controller;
 
 const steps = ['Conectar al servidor', 'Activar la base', 'Verificar acceso'];
@@ -19,7 +17,6 @@ const currentStep = computed(() => state.value === 'ready' ? 3
 const updateStatus = status => {
   state.value = status.state;
   message.value = status.message;
-  if (status.state === 'paused') needsCode.value = true;
 };
 
 onMounted(async () => {
@@ -47,7 +44,7 @@ const start = async () => {
   try {
     const status = await monitorSystem({
       getStatus: getSystemStatus, restore: wakeSystem, onStatus: updateStatus,
-      activationCode: activationCode.value, signal
+      signal
     });
     if (status.state === 'ready') emit('ready');
   } catch (err) {
@@ -55,7 +52,6 @@ const start = async () => {
       error.value = err.response?.data?.error || err.message || 'No pudimos activar el sistema. Intentá nuevamente.';
     }
   } finally {
-    activationCode.value = '';
     busy.value = false;
     emit('busy', false);
   }
@@ -78,12 +74,6 @@ onBeforeUnmount(() => controller?.abort());
       <p class="wake-hint">Puede tardar unos minutos. El servicio no informa un porcentaje exacto.</p>
     </template>
     <form @submit.prevent="start">
-      <div v-if="needsCode && !busy && state !== 'ready'" class="wake-code">
-        <label for="system-wake-code">Código de activación</label>
-        <input id="system-wake-code" v-model="activationCode" type="password" maxlength="256" autocomplete="off" required
-          placeholder="Código compartido de la familia" aria-describedby="wake-code-help" />
-        <p id="wake-code-help" class="wake-hint">Pedíselo al administrador. Es distinto de tu contraseña de ingreso.</p>
-      </div>
       <button type="submit" class="wake-button" :disabled="busy">
         {{ busy ? 'Levantando sistema…' : state === 'ready' ? 'Comprobar sistema' : 'Despertar sistema' }}
       </button>
@@ -99,7 +89,7 @@ onBeforeUnmount(() => controller?.abort());
 .is-ready .status-dot { background: #00ff66; }
 .wake-button { width: 100%; margin-top: 0.85rem; padding: 0.7rem; border: 1px solid #00ff66; border-radius: 7px; background: transparent; color: #00ff66; font-weight: 600; }
 .wake-button:disabled { opacity: 0.65; cursor: wait; }
-.wake-button:focus-visible, input:focus-visible { outline: 2px solid #00ff66; outline-offset: 3px; }
+.wake-button:focus-visible { outline: 2px solid #00ff66; outline-offset: 3px; }
 .wake-progress { height: 5px; background: #2d3631; overflow: hidden; border-radius: 4px; margin-top: 1rem; }
 .wake-progress span { display: block; width: 40%; height: 100%; background: #00ff66; animation: waking 1.6s ease-in-out infinite; }
 @keyframes waking { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
@@ -109,8 +99,5 @@ onBeforeUnmount(() => controller?.abort());
 .wake-steps .done { color: #00ff66; }
 .wake-steps span { display: inline-block; width: 1.1rem; }
 .wake-hint { font-size: 0.75rem; color: #a5afa8; line-height: 1.5; margin: 0.65rem 0 0; }
-.wake-code { margin-top: 0.9rem; }
-.wake-code label { display: block; font-size: 0.8rem; margin-bottom: 0.5rem; color: #c8ceca; }
-.wake-code input { width: 100%; padding: 0.65rem; border: 1px solid #3e4842; border-radius: 6px; background: #101411; color: white; }
 .wake-error { color: #ff9999; font-size: 0.8rem; line-height: 1.5; margin: 0.8rem 0 0; }
 </style>

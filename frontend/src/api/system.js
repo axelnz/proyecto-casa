@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Public status and a separate wake permission; never send the user's JWT here.
+// Public status and wake operation; never send the user's JWT here.
 const systemApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 20000
@@ -16,4 +16,4 @@ const readStatus = response => {
 };
 
 export const getSystemStatus = signal => systemApi.get('/system/status', { signal }).then(readStatus);
-export const wakeSystem = (activationCode, signal) => systemApi.post('/system/wake', { activationCode }, { signal }).then(readStatus);
+export const wakeSystem = signal => systemApi.post('/system/wake', {}, { signal }).then(readStatus);
