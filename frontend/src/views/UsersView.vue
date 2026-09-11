@@ -1,4 +1,6 @@
 <script setup>
+import SortHeader from '../components/SortHeader.vue';
+import { useTableSort } from '../composables/useTableSort';
 import { ref, onMounted, computed } from 'vue';
 import api from '../api/axios';
 import { formatCurrency } from '../utils/formatters';
@@ -108,6 +110,11 @@ const saveUser = async () => {
     submitting.value = false;
   }
 };
+const { sort, toggleSort, sortedRows } = useTableSort(users, {
+  id: { type: 'number' },
+  is_active: { value: row => row.is_active ? 'Activo' : 'Baja' },
+  default_contribution: { type: 'number' }
+});
 </script>
 
 <template>
@@ -124,17 +131,17 @@ const saveUser = async () => {
       <table class="data-table responsive-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Aporte Base</th>
+            <SortHeader column="id" label="ID" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="name" label="Nombre" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="email" label="Email" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="role" label="Rol" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="is_active" label="Estado" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="default_contribution" label="Aporte Base" :sort="sort" @sort="toggleSort" />
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
+          <tr v-for="user in sortedRows" :key="user.id">
             <td data-label="ID">#{{ user.id }}</td>
             <td data-label="Nombre" class="font-bold">{{ user.name }}</td>
             <td data-label="Email">{{ user.email }}</td>

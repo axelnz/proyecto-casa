@@ -103,4 +103,6 @@ Este proyecto implementa múltiples capas de seguridad para proteger los datos f
 
 ## 📝 Estado del Proyecto
 
+La configuración del botón **Despertar sistema**, sus permisos y el ordenamiento de tablas están documentados en [docs/SYSTEM_WAKE.md](docs/SYSTEM_WAKE.md).
+
 Actualmente el proyecto se encuentra en una versión funcional **MVP (Minimum Viable Product)** con los módulos de Usuarios, Meses, Conceptos, Préstamos, Gastos y Dashboard completamente integrados y en constante evolución de UI/UX.

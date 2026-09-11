@@ -1,4 +1,6 @@
 <script setup>
+import SortHeader from '../components/SortHeader.vue';
+import { useTableSort } from '../composables/useTableSort';
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
@@ -234,6 +236,10 @@ const handleExportExcel = () => {
   const fileName = `gastos_${selectedYear.value}_${String(selectedMonth.value).padStart(2, '0')}.xlsx`;
   exportExpensesToExcel(dashboardData.value.movimientos_recientes, fileName);
 };
+const { sort, toggleSort, sortedRows } = useTableSort(() => dashboardData.value?.movimientos_recientes || [], {
+  date: { type: 'date' },
+  amount: { type: 'number', value: row => Math.abs(Number(row.amount)) }
+});
 </script>
 
 <template>
@@ -320,16 +326,16 @@ const handleExportExcel = () => {
           <table class="data-table responsive-table">
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Concepto</th>
-                <th>Descripción</th>
-                <th>Monto</th>
-                <th>Cargado por</th>
-                <th>A cuenta de</th>
+                <SortHeader column="date" label="Fecha" :sort="sort" @sort="toggleSort" />
+                <SortHeader column="concept_name" label="Concepto" :sort="sort" @sort="toggleSort" />
+                <SortHeader column="description" label="Descripción" :sort="sort" @sort="toggleSort" />
+                <SortHeader column="amount" label="Monto" :sort="sort" @sort="toggleSort" />
+                <SortHeader column="created_by_name" label="Cargado por" :sort="sort" @sort="toggleSort" />
+                <SortHeader column="assigned_to_name" label="A cuenta de" :sort="sort" @sort="toggleSort" />
               </tr>
             </thead>
             <tbody>
-              <tr v-for="gasto in dashboardData.movimientos_recientes" :key="gasto.id">
+              <tr v-for="gasto in sortedRows" :key="gasto.id">
                 <td data-label="Fecha">{{ gasto.date.split(' ')[0].split('-').reverse().join('/') }}</td>
                 <td data-label="Concepto">
                   <span v-if="gasto.concept_name" class="concept-tag">{{ gasto.concept_name }}</span>

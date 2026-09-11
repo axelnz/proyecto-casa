@@ -1,4 +1,6 @@
 <script setup>
+import SortHeader from '../components/SortHeader.vue';
+import { useTableSort } from '../composables/useTableSort';
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import MoneyInput from '../components/MoneyInput.vue';
@@ -228,6 +230,11 @@ const executeDelete = async () => {
     alert('Error al eliminar.');
   }
 };
+const { sort, toggleSort, sortedRows } = useTableSort(movementsFiltered, {
+  date: { type: 'date' },
+  category_name: { value: row => row.category_name || 'Sin categoría' },
+  amount: { type: 'number' }
+});
 </script>
 
 <template>
@@ -338,15 +345,15 @@ const executeDelete = async () => {
           <table class="data-table">
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Descripción</th>
-                <th>Categoría</th>
-                <th class="text-right">Importe</th>
+                <SortHeader column="date" label="Fecha" :sort="sort" @sort="toggleSort" />
+                <SortHeader column="description" label="Descripción" :sort="sort" @sort="toggleSort" />
+                <SortHeader column="category_name" label="Categoría" :sort="sort" @sort="toggleSort" />
+                <SortHeader class="text-right" column="amount" label="Importe" :sort="sort" @sort="toggleSort" />
                 <th v-if="authStore.isAdmin" class="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="m in movementsFiltered" :key="m.id">
+              <tr v-for="m in sortedRows" :key="m.id">
                 <td class="date-cell">{{ formatDate(m.date) }}</td>
                 <td class="desc-cell">{{ m.description }}</td>
                 <td>

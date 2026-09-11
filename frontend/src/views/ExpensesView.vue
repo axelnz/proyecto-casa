@@ -1,4 +1,6 @@
 <script setup>
+import SortHeader from '../components/SortHeader.vue';
+import { useTableSort } from '../composables/useTableSort';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
@@ -185,6 +187,10 @@ const handleConfirm = () => {
   if (confirmModal.value.onConfirm) confirmModal.value.onConfirm();
   confirmModal.value.show = false;
 };
+const { sort, toggleSort, sortedRows } = useTableSort(expensesData, {
+  date: { type: 'date' },
+  amount: { type: 'number', value: row => Math.abs(Number(row.amount)) }
+});
 </script>
 
 <template>
@@ -235,17 +241,17 @@ const handleConfirm = () => {
       <table class="data-table responsive-table">
         <thead>
           <tr>
-            <th>Fecha Real</th>
-            <th>Concepto</th>
-            <th>Descripción / Item</th>
-            <th>Atribuído A</th>
-            <th>Ingresado Por</th>
-            <th>Monto</th>
+            <SortHeader column="date" label="Fecha Real" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="concept_name" label="Concepto" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="description" label="Descripción / Item" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="assigned_to_name" label="Atribuído A" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="created_by_name" label="Ingresado Por" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="amount" label="Monto" :sort="sort" @sort="toggleSort" />
             <th>Ajustes</th>
           </tr>
         </thead>
         <tbody>
-            <tr v-for="expense in expensesData" :key="expense.id">
+            <tr v-for="expense in sortedRows" :key="expense.id">
               <td data-label="Fecha Real">
                 <span class="d-text">{{ expense.date.split(' ')[0].split('-').reverse().join('/') }}</span>
                 <span class="muted date-time" v-if="expense.date.includes(' ')">

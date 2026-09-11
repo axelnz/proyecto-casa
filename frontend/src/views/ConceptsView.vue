@@ -1,4 +1,6 @@
 <script setup>
+import SortHeader from '../components/SortHeader.vue';
+import { useTableSort } from '../composables/useTableSort';
 import { ref, onMounted } from 'vue';
 import api from '../api/axios';
 import ConfirmModal from '../components/ConfirmModal.vue';
@@ -85,6 +87,9 @@ const handleConfirm = () => {
   if (confirmModal.value.onConfirm) confirmModal.value.onConfirm();
   confirmModal.value.show = false;
 };
+const { sort, toggleSort, sortedRows } = useTableSort(concepts, {
+  status: { value: () => 'Habilitado' }
+});
 </script>
 
 <template>
@@ -105,13 +110,13 @@ const handleConfirm = () => {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Nombre del Concepto</th>
-            <th>Estado</th>
+            <SortHeader column="name" label="Nombre del Concepto" :sort="sort" @sort="toggleSort" />
+            <SortHeader column="status" label="Estado" :sort="sort" @sort="toggleSort" />
             <th class="text-right">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="concept in concepts" :key="concept.id">
+          <tr v-for="concept in sortedRows" :key="concept.id">
             <td class="font-bold">{{ concept.name }}</td>
             <td>
               <span class="status-chip open">Habilitado</span>

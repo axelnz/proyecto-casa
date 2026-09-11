@@ -13,7 +13,13 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: 5000
+});
+
+// Supabase may close idle connections while pausing. Let pg discard them and reconnect.
+pool.on('error', () => {
+    console.error('Se perdió una conexión inactiva con la base. Se abrirá una nueva al volver a consultar.');
 });
 
 const initializeDatabase = async () => {

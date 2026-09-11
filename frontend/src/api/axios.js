@@ -24,6 +24,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (!error.response || error.response.status >= 500) {
+      window.dispatchEvent(new Event('system-connection-error'));
+    }
     if (error.response && error.response.status === 401) {
       // Si el 401 viene del intento de login, dejamos que el store lo maneje y muestre el error en pantalla
       if (!error.config.url.includes('/auth/login')) {

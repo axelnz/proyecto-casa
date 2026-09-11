@@ -1,5 +1,6 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
+import SystemWake from '../components/SystemWake.vue';
 import { RouterView, RouterLink, useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 
@@ -8,6 +9,15 @@ const router = useRouter();
 const route = useRoute();
 
 const isSidebarOpen = ref(false);
+const systemUnavailable = ref(false);
+const showSystemRecovery = () => { systemUnavailable.value = true; };
+window.addEventListener('system-connection-error', showSystemRecovery);
+onBeforeUnmount(() => window.removeEventListener('system-connection-error', showSystemRecovery));
+const systemReady = () => {
+  authStore.logout();
+  sessionStorage.setItem('system-wake-ready', '1');
+  window.location.assign('/login');
+};
 
 const handleLogout = () => {
   authStore.logout();
@@ -70,6 +80,7 @@ watch(() => route.path, () => {
       </header>
       
       <div class="page-content">
+        <SystemWake v-if="systemUnavailable" @ready="systemReady" />
         <!-- Renderiza Dashboard, Users, o lo que venga -->
         <RouterView />
       </div>

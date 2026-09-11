@@ -29,6 +29,15 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Set only for the trusted proxy topology used by the deployment (never blindly true).
+if (process.env.TRUST_PROXY) {
+    const value = process.env.TRUST_PROXY;
+    app.set('trust proxy', /^\d+$/.test(value) ? Number(value) : value);
+}
+
+// Independent limits: waiting for Supabase must not exhaust the login/API quota.
+app.use('/api/system', require('./src/routes/systemRoutes')());
+
 // 3. Rate Limiting: Limitar peticiones para prevenir ataques de fuerza bruta
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos

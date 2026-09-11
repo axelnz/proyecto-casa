@@ -216,7 +216,21 @@
     width: 100% !important;
   }
   .responsive-table thead {
-    display: none !important;
+    display: block !important;
+  }
+  .responsive-table thead tr {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    padding: 0.75rem;
+  }
+  .responsive-table thead th {
+    padding: 0;
+    border: 0;
+    white-space: normal;
+  }
+  .responsive-table thead th:not(.sortable-header) {
+    display: none;
   }
   .responsive-table tbody,
   .responsive-table tr,

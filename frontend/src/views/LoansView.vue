@@ -1,4 +1,6 @@
 <script setup>
+import SortHeader from '../components/SortHeader.vue';
+import { useTableSort } from '../composables/useTableSort';
 import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import api from '../api/axios';
@@ -379,6 +381,11 @@ const handleConfirm = () => {
 };
 
 onMounted(loadData);
+const { sort, toggleSort, sortedRows } = useTableSort(() => loanPayments.value[expandedLoanId.value] || [], {
+  payment_date: { type: 'date' },
+  amount: { type: 'number' },
+  assigned_to_name: { value: row => `${row.assigned_to_name || ''} (por ${row.created_by_name || ''})` }
+});
 </script>
 
 <template>
@@ -520,15 +527,15 @@ onMounted(loadData);
               <table class="payments-table">
                 <thead>
                   <tr>
-                    <th>Fecha</th>
-                    <th>Monto</th>
-                    <th>Usuario</th>
-                    <th>Comentario</th>
+                    <SortHeader column="payment_date" label="Fecha" :sort="sort" @sort="toggleSort" />
+                    <SortHeader column="amount" label="Monto" :sort="sort" @sort="toggleSort" />
+                    <SortHeader column="assigned_to_name" label="Usuario" :sort="sort" @sort="toggleSort" />
+                    <SortHeader column="comment" label="Comentario" :sort="sort" @sort="toggleSort" />
                     <th v-if="authStore.isAdmin"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="pay in loanPayments[loan.id]" :key="pay.id">
+                  <tr v-for="pay in sortedRows" :key="pay.id">
                     <td>{{ new Date(pay.payment_date).toLocaleDateString() }}</td>
                     <td class="amount">${{ formatCurrency(pay.amount) }}</td>
                     <td>{{ pay.assigned_to_name }} <small>(por {{ pay.created_by_name }})</small></td>

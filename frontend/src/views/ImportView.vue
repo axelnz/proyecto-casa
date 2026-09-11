@@ -1,4 +1,6 @@
 <script setup>
+import SortHeader from '../components/SortHeader.vue';
+import { useTableSort } from '../composables/useTableSort';
 import { ref, computed, onMounted } from 'vue';
 import * as XLSX from 'xlsx';
 import api from '../api/axios';
@@ -346,6 +348,12 @@ const reset = () => {
   movements.value = [];
   importResult.value = null;
 };
+const { sort, toggleSort, sortedRows } = useTableSort(movements, {
+  date: { type: 'date' },
+  period: { type: 'number', value: row => row.year * 12 + row.month },
+  amount: { type: 'number' },
+  person: { value: row => users.value.find(user => user.id === row.assigned_to_user_id)?.name }
+});
 </script>
 
 <template>
@@ -514,15 +522,15 @@ const reset = () => {
         <table class="preview-table">
           <thead>
             <tr>
-              <th>Fecha</th>
-              <th>Periodo</th>
-              <th>Descripción</th>
-              <th>Monto</th>
-              <th>Para</th>
+              <SortHeader column="date" label="Fecha" :sort="sort" @sort="toggleSort" />
+              <SortHeader column="period" label="Periodo" :sort="sort" @sort="toggleSort" />
+              <SortHeader column="description" label="Descripción" :sort="sort" @sort="toggleSort" />
+              <SortHeader column="amount" label="Monto" :sort="sort" @sort="toggleSort" />
+              <SortHeader column="person" label="Para" :sort="sort" @sort="toggleSort" />
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(m, idx) in movements.slice(0, 50)" :key="idx">
+            <tr v-for="(m, idx) in sortedRows.slice(0, 50)" :key="idx">
               <td>{{ m.date.split(' ')[0].split('-').reverse().join('/') }}</td>
               <td>{{ m.periodDisplay }}</td>
               <td>{{ m.description }}</td>
