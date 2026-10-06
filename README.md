@@ -103,6 +103,19 @@ Este proyecto implementa múltiples capas de seguridad para proteger los datos f
 
 ## 📝 Estado del Proyecto
 
+### Instalar en el celular
+
+Abrir [Proyecto Casa](https://proyecto-casa-three.vercel.app) y recargar una vez para recibir la versión actual:
+
+- **Android / Chrome:** menú ⋮ → Agregar a la pantalla principal → Instalar.
+- **iPhone / Safari:** Compartir → Agregar a pantalla de inicio. Si aparece «Abrir como app web», dejarlo activado.
+
+La app instalada aparece como **Casa**, con un ícono de casa verde, y abre en una ventana propia. Puede pedir iniciar sesión al abrirla por primera vez. Sigue necesitando conexión y mantiene el mismo backend, las mismas cuentas y los mismos datos.
+
+La instalación se configura con `frontend/public/manifest.webmanifest`, íconos PNG de 192/512 px, ícono maskable para Android y `apple-touch-icon` de 180 px para iPhone. Vite copia estos archivos a `dist`; Vercel los sirve públicamente por HTTPS. No requiere migración de Supabase, cambios en Render ni un service worker. Los íconos pueden regenerarse con `python frontend/scripts/generate-icons.py` (Pillow).
+
+Referencia: [requisitos de instalación de aplicaciones web](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable).
+
 La configuración del botón **Despertar sistema**, sus permisos y el ordenamiento de tablas están documentados en [docs/SYSTEM_WAKE.md](docs/SYSTEM_WAKE.md).
 
 Actualmente el proyecto se encuentra en una versión funcional **MVP (Minimum Viable Product)** con los módulos de Usuarios, Meses, Conceptos, Préstamos, Gastos y Dashboard completamente integrados y en constante evolución de UI/UX.
